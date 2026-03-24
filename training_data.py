@@ -107,7 +107,8 @@ if verify is None:
     "localization_correct": True,
     "file_identified": "requests/sessions.py",
     "function_identified": "merge_environment_settings",
-    "ground_truth_line_range": [420, 427]
+    "ground_truth_line_range": [420, 427],
+    "reward": 1.0
   },
   "metadata": {"difficulty": "hard", "self_corrected": True, "task_tokens": 890}
 },
@@ -1330,7 +1331,7 @@ def print_stats(data):
 
 if __name__ == "__main__":
     import os
-    os.makedirs("output", exist_ok=True)
-    export_jsonl(TRAINING_DATA, "output/coding_agent_train.jsonl")
-    export_pretty(TRAINING_DATA, "output/coding_agent_train_pretty.json")
+    os.makedirs("data", exist_ok=True)
+    export_jsonl(TRAINING_DATA, "data/coding_agent_train.jsonl")
+    export_pretty(TRAINING_DATA, "data/coding_agent_train_pretty.json")
     print_stats(TRAINING_DATA)

@@ -17,9 +17,6 @@ venv/
 env/
 .env/
 
-# Output / generated files
-output/
-
 # IDE / editor
 .vscode/
 .idea/

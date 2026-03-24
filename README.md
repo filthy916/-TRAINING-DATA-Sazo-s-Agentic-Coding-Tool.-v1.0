@@ -4,21 +4,48 @@ A complete training data suite for a **goal-driven, self-correcting agentic codi
 
 ---
 
+## Quick Start
+
+```bash
+# 1. Clone
+git clone https://github.com/filthy916/-TRAINING-DATA-Sazo-s-Agentic-Coding-Tool.-v1.0.git
+cd -TRAINING-DATA-Sazo-s-Agentic-Coding-Tool.-v1.0
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Load the pre-built training data (ready to use immediately)
+python - <<'EOF'
+import json
+with open("data/coding_agent_train.jsonl") as f:
+    examples = [json.loads(line) for line in f if line.strip()]
+print(f"Loaded {len(examples)} training examples")
+for ex in examples:
+    print(f"  {ex['id']:20s}  task={ex['task_type']:22s}  reward={ex['reward_signal']['reward']}")
+EOF
+
+# 4. (Optional) Regenerate data files from source
+python training_data.py
+```
+
+---
+
 ## Repository Contents
 
 | File | Description |
 |---|---|
-| `CODING_AGENT_TRAINING_DATA` | Python source that defines and exports all training examples |
-| `CODING_AGENT_JSON` | JSONL export — one training example per line, ready for SFT pipelines |
-| `CODING_AGENT_TRAIN_PRETTY` | Pretty-printed JSON array of the same training data (human-readable) |
-| `RCG_TRAINING` | Residual Compression Gradient (RCG) — novel training algorithm implementation |
-| `Primitive_Root_Transfer` | Primitive Root Transfer Resonance — number-theory-based weight initialisation |
+| `training_data.py` | Python source — defines all training examples and exports to `data/` |
+| `rcg_training.py` | Residual Compression Gradient (RCG) — novel training algorithm |
+| `primitive_root_transfer.py` | Primitive Root Transfer Resonance — number-theory weight initialisation |
+| `data/coding_agent_train.jsonl` | JSONL export — one training example per line, ready for SFT pipelines |
+| `data/coding_agent_train_pretty.json` | Pretty-printed JSON array (human-readable) |
+| `requirements.txt` | Python dependencies (`numpy`, `torch`) |
 
 ---
 
 ## Training Data Format
 
-Each example in `CODING_AGENT_JSON` / `CODING_AGENT_TRAIN_PRETTY` follows this schema:
+Each example in `data/coding_agent_train.jsonl` follows this schema:
 
 ```json
 {
@@ -29,7 +56,9 @@ Each example in `CODING_AGENT_JSON` / `CODING_AGENT_TRAIN_PRETTY` follows this s
     {"role": "user",      "content": "..."},
     {"role": "assistant", "content": "..."}
   ],
-  "reward_signal": { ... },
+  "reward_signal": {
+    "reward": 1.0
+  },
   "metadata": {
     "difficulty": "easy | medium | hard | expert",
     "self_corrected": true,
@@ -63,13 +92,13 @@ Each example carries a structured reward signal used in **Stage 3 RLEF** (Reinfo
 - **`tests_passed` / `tests_total`** — execution-verified pass rate
 - **`localization_correct`** — boolean for bug-finding tasks
 - **`self_corrected`** — whether the agent detected and fixed its own mistake
-- **`reward`** — scalar reward (higher for harder tasks and successful self-correction; maximum 1.8 for expert-level self-correction with correct root-cause diagnosis)
+- **`reward`** — scalar reward (1.0–1.8; higher for harder tasks and successful self-correction; maximum 1.8 for expert-level self-correction with correct root-cause diagnosis)
 
 ---
 
 ## Algorithms
 
-### Residual Compression Gradient (RCG) — `RCG_TRAINING`
+### Residual Compression Gradient (RCG) — `rcg_training.py`
 
 A structurally novel training procedure grounded in **algorithmic information theory**. It is not a variant of Adam, SGD, GRPO, PPO, DPO, or any published algorithm.
 
@@ -94,7 +123,7 @@ The `δ` term makes the update signal not "did we reduce loss now?" but **"did o
 
 ---
 
-### Primitive Root Transfer Resonance — `Primitive_Root_Transfer`
+### Primitive Root Transfer Resonance — `primitive_root_transfer.py`
 
 A weight-initialisation and learning-rate scheduling scheme built on **primitive root mathematics**.
 
@@ -113,39 +142,40 @@ A weight-initialisation and learning-rate scheduling scheme built on **primitive
 
 **Transfer resonance intuition:** standard random initialisation places neurons at Gaussian-distributed positions — clustering is likely. Primitive root initialisation maps weight values to the orbit of `g mod p` (where `p` is chosen relative to layer size), guaranteeing equidistribution within that modulus and reducing representation collapse on transfer tasks. For layers larger than `p−1`, the orbit wraps cyclically, maintaining uniform coverage across residue classes.
 
-This module is designed to integrate with `RCG_TRAINING`.
+This module is designed to integrate with `rcg_training.py`.
 
 ---
 
 ## Usage
 
-### Export training data
-
-```python
-python CODING_AGENT_TRAINING_DATA
-# outputs:
-#   output/coding_agent_train.jsonl        (JSONL, one example per line)
-#   output/coding_agent_train_pretty.json  (pretty-printed JSON array)
-```
-
-### Load in a training pipeline
+### Load training data in a pipeline
 
 ```python
 import json
 
-with open("CODING_AGENT_JSON") as f:  # JSONL file (no extension by convention)
+with open("data/coding_agent_train.jsonl") as f:
     examples = [json.loads(line) for line in f if line.strip()]
 
-# Each example has: id, task_type, turns, reward_signal, metadata
+# Each example: id, task_type, turns, reward_signal, metadata
 for ex in examples:
-    messages = ex["turns"]   # list of {"role": ..., "content": ...}
+    messages = ex["turns"]          # list of {"role": ..., "content": ...}
     reward   = ex["reward_signal"]["reward"]
+    print(ex["id"], reward)
+```
+
+### Regenerate data files from source
+
+```python
+python training_data.py
+# outputs:
+#   data/coding_agent_train.jsonl        (JSONL, one example per line)
+#   data/coding_agent_train_pretty.json  (pretty-printed JSON array)
 ```
 
 ### Use RCG as the training loop
 
 ```python
-# See RCG_TRAINING for full implementation
+# See rcg_training.py for full implementation
 from rcg_training import RCGTrainer
 
 trainer = RCGTrainer(model, compress_fn=your_compressor)
@@ -155,7 +185,7 @@ trainer.train(dataloader)
 ### Use primitive root initialisation
 
 ```python
-# See Primitive_Root_Transfer for full implementation
+# See primitive_root_transfer.py for full implementation
 from primitive_root_transfer import primitive_root_init, resonance_coupling_matrix
 
 model = MyModel()
@@ -170,19 +200,34 @@ C = resonance_coupling_matrix(layer_sizes=[256, 512, 256])
 | Stage | Type | Data Source |
 |---|---|---|
 | Stage 1 | Pre-training | Not included (use standard code corpora) |
-| Stage 2 | Supervised Fine-Tuning (SFT) | `CODING_AGENT_JSON` / `CODING_AGENT_TRAIN_PRETTY` |
+| Stage 2 | Supervised Fine-Tuning (SFT) | `data/coding_agent_train.jsonl` |
 | Stage 3 | RLEF | `reward_signal` fields in each example + live execution feedback |
 
 ---
 
-## Statistics
+## Dataset Statistics
 
 ```
 Total examples     : 7
 Task type coverage : 7/7
 Self-corrected     : 3/7
-Difficulty range   : medium → expert
+Difficulty range   : hard → expert
 Reward range       : 1.0 – 1.8
+Avg reward         : 1.44
+```
+
+---
+
+## Requirements
+
+- Python 3.10+
+- `numpy>=1.24` (primitive_root_transfer.py)
+- `torch>=2.0` (rcg_training.py)
+
+Install with:
+
+```bash
+pip install -r requirements.txt
 ```
 
 ---
@@ -190,3 +235,4 @@ Reward range       : 1.0 – 1.8
 ## License
 
 [MIT License](LICENSE) — free to use, modify, and distribute with attribution.
+
