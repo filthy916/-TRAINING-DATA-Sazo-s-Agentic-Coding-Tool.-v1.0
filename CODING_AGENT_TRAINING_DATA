@@ -162,7 +162,7 @@ def get_columns(self, with_aliases=False):
         ...
 ```
 
-**Tool call:** `grep -n "class Col\|def __iter__\|def deconstruct" django/db/models/expressions.py | head -30`
+**Tool call:** `grep -n "class Col\\|def __iter__\\|def deconstruct" django/db/models/expressions.py | head -30`
 
 ```
 class Col(Expression):
@@ -920,7 +920,7 @@ S3 doesn't have atomic multi-part writes — there's a race condition between
 - 6h ago file: if it were truly old, all reads would succeed
 - Parquet footer is written last: a partial/in-progress upload has no valid footer → `_metadata` is None
 
-**Tool call:** `grep -n "write\|upload\|put_object\|to_parquet" app/workers/ingest_worker.py`
+**Tool call:** `grep -n "write\\|upload\\|put_object\\|to_parquet" app/workers/ingest_worker.py`
 
 ```python
 88:  df.to_parquet(tmp_local_path, engine='pyarrow')
@@ -928,7 +928,7 @@ S3 doesn't have atomic multi-part writes — there's a race condition between
 90:  redis.set(f"ready:{s3_key}", "1")   # <-- signals ready
 ```
 
-**Tool call:** `grep -n "read\|download\|get_object\|ready" app/workers/export_worker.py`
+**Tool call:** `grep -n "read\\|download\\|get_object\\|ready" app/workers/export_worker.py`
 
 ```python
 82:  if redis.get(f"ready:{s3_key}"):    # <-- checks ready flag

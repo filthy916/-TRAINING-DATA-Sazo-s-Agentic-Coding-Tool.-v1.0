@@ -189,4 +189,4 @@ Reward range       : 1.0 – 1.8
 
 ## License
 
-See repository settings for license information.
+[MIT License](LICENSE) — free to use, modify, and distribute with attribution.
