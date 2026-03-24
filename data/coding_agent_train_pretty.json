@@ -23,7 +23,8 @@
       "ground_truth_line_range": [
         420,
         427
-      ]
+      ],
+      "reward": 1.0
     },
     "metadata": {
       "difficulty": "hard",

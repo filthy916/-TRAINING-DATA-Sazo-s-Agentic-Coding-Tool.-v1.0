@@ -107,7 +107,8 @@ if verify is None:
     "localization_correct": True,
     "file_identified": "requests/sessions.py",
     "function_identified": "merge_environment_settings",
-    "ground_truth_line_range": [420, 427]
+    "ground_truth_line_range": [420, 427],
+    "reward": 1.0
   },
   "metadata": {"difficulty": "hard", "self_corrected": True, "task_tokens": 890}
 },
@@ -162,7 +163,7 @@ def get_columns(self, with_aliases=False):
         ...
 ```
 
-**Tool call:** `grep -n "class Col\|def __iter__\|def deconstruct" django/db/models/expressions.py | head -30`
+**Tool call:** `grep -n "class Col\\|def __iter__\\|def deconstruct" django/db/models/expressions.py | head -30`
 
 ```
 class Col(Expression):
@@ -920,7 +921,7 @@ S3 doesn't have atomic multi-part writes — there's a race condition between
 - 6h ago file: if it were truly old, all reads would succeed
 - Parquet footer is written last: a partial/in-progress upload has no valid footer → `_metadata` is None
 
-**Tool call:** `grep -n "write\|upload\|put_object\|to_parquet" app/workers/ingest_worker.py`
+**Tool call:** `grep -n "write\\|upload\\|put_object\\|to_parquet" app/workers/ingest_worker.py`
 
 ```python
 88:  df.to_parquet(tmp_local_path, engine='pyarrow')
@@ -928,7 +929,7 @@ S3 doesn't have atomic multi-part writes — there's a race condition between
 90:  redis.set(f"ready:{s3_key}", "1")   # <-- signals ready
 ```
 
-**Tool call:** `grep -n "read\|download\|get_object\|ready" app/workers/export_worker.py`
+**Tool call:** `grep -n "read\\|download\\|get_object\\|ready" app/workers/export_worker.py`
 
 ```python
 82:  if redis.get(f"ready:{s3_key}"):    # <-- checks ready flag
@@ -1330,7 +1331,7 @@ def print_stats(data):
 
 if __name__ == "__main__":
     import os
-    os.makedirs("output", exist_ok=True)
-    export_jsonl(TRAINING_DATA, "output/coding_agent_train.jsonl")
-    export_pretty(TRAINING_DATA, "output/coding_agent_train_pretty.json")
+    os.makedirs("data", exist_ok=True)
+    export_jsonl(TRAINING_DATA, "data/coding_agent_train.jsonl")
+    export_pretty(TRAINING_DATA, "data/coding_agent_train_pretty.json")
     print_stats(TRAINING_DATA)
